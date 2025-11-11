@@ -91,16 +91,9 @@ class StormyApp(tk.Tk):
         self.city_cb.pack(side=tk.LEFT, padx=8)
         self.city_cb.bind("<<ComboboxSelected>>", lambda e: self.refresh_all())
 
-        # Small status label showing when the data was last updated (based on hourly.csv)
-        self.updated_var = tk.StringVar(value="Updated: –")
-        self.updated_label = tk.Label(ctl, textvariable=self.updated_var, bg=CTRL_BG, fg=CTRL_TEXT)
-        self.updated_label.pack(side=tk.RIGHT, padx=(8, 0))
-
-        # Quick action buttons
+        # Quick action button
         self.compare_btn = ttk.Button(ctl, text="Compare…", command=self.open_compare_popup)
         self.compare_btn.pack(side=tk.RIGHT, padx=(8, 0))
-        self.reload_btn = ttk.Button(ctl, text="Reload CSVs", command=self.reload_data)
-        self.reload_btn.pack(side=tk.RIGHT, padx=(8, 0))
 
         # 3) Tabs for the four views we present in the UI
         # Notebook with a custom style so tabs fill the width and have subtle color/border
@@ -148,7 +141,6 @@ class StormyApp(tk.Tk):
         # Apply the accent styles to controls created earlier
         try:
             self.compare_btn.configure(style='Action.TButton')
-            self.reload_btn.configure(style='Action.TButton')
             self.city_cb.configure(style='City.TCombobox')
         except Exception:
             pass
@@ -163,8 +155,7 @@ class StormyApp(tk.Tk):
         self.nb.bind('<Configure>', self._equalize_tab_widths)
         self.after(0, self._equalize_tab_widths)
 
-        # Update status text and draw everything once at startup
-        self._update_last_updated_label()
+        # Draw everything once at startup
         self.refresh_all()
 
     # ---------- Utilities ----------
@@ -195,42 +186,6 @@ class StormyApp(tk.Tk):
             color='#dddddd',
             bbox=dict(facecolor=(0, 0, 0, 0.25), edgecolor='none', boxstyle='round,pad=0.3')
         )
-
-    def _update_last_updated_label(self):
-        # Show the most recent timestamp from hourly.csv, or a dash if not available
-        try:
-            if not self.df_hourly.empty and "datetime_local" in self.df_hourly.columns:
-                ts = pd.to_datetime(self.df_hourly["datetime_local"], errors="coerce").max()
-                if pd.notnull(ts):
-                    self.updated_var.set(f"Updated: {ts.strftime('%Y-%m-%d %H:%M')}")
-                    return
-        except Exception:
-            pass
-        self.updated_var.set("Updated: –")
-
-    def reload_data(self):
-        # Re-read CSV files from disk and refresh views (useful after running the fetcher)
-        _h = _load_csv(os.path.join(DATA_DIR, "hourly.csv"), parse_dates=["datetime_local"]) 
-        self.df_hourly = _h if _h is not None else pd.DataFrame()
-        _d = _load_csv(os.path.join(DATA_DIR, "daily.csv"), parse_dates=["date_local"]) 
-        self.df_daily = _d if _d is not None else pd.DataFrame()
-        _hd = _load_csv(os.path.join(DATA_DIR, "historical_daily.csv"), parse_dates=["date_local"]) 
-        self.h_daily = _hd if _hd is not None else pd.DataFrame()
-        _hm = _load_csv(os.path.join(DATA_DIR, "historical_monthly.csv")) 
-        self.h_monthly = _hm if _hm is not None else pd.DataFrame()
-        _hq = _load_csv(os.path.join(DATA_DIR, "historical_quarterly.csv")) 
-        self.h_quarterly = _hq if _hq is not None else pd.DataFrame()
-
-        # Update city list and combobox if needed
-        new_cities = sorted(self.df_daily["city"].unique().tolist()) if not self.df_daily.empty else []
-        self.city_cb["values"] = new_cities
-        if self.selected_city.get() not in new_cities:
-            self.selected_city.set(new_cities[0] if new_cities else "")
-        self.cities = new_cities
-
-        # Update the status label and re-render views
-        self._update_last_updated_label()
-        self.refresh_all()
 
     def _equalize_tab_widths(self, event=None):
         # Ensure notebook tabs share the full width equally.

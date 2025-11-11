@@ -1,4 +1,4 @@
-Stormy — Weather Insights That Answer “What Will It Feel Like?”
+Stormy — Weather Insights That Answers “What Will It Feel Like?”
 
 Why this exists (the problem)
 Most weather apps flood you with raw numbers. What people need day‑to‑day is a quick sense of “what it will feel like” this week and how that compares to typical conditions. For 12 major Romanian cities, Stormy distills the last 14 days and the next 14 days into clear visuals and simple, comparable metrics — so decisions are easier and faster.
@@ -38,7 +38,7 @@ Quickstart
    python stormy_ui.py
 
 Offline use
-- If you can’t run the fetcher (no internet, restricted environment), the UI will still open using whatever CSVs are present in the CSVs/ folder. A small “Updated:” label shows the latest timestamp found in hourly.csv.
+- If you can’t run the fetcher (no internet, restricted environment), the UI will still open using whatever CSVs are present in the CSVs/ folder.
 
 Outputs (written/read in CSVs/)
 - CSVs/hourly.csv: city, datetime_local, temp_c, precip_prob_pct, precip_mm, rain_mm, snowfall_mm, cloudcover_pct, wind_kmh, wind_gust_kmh, humidity_pct, weather_state
